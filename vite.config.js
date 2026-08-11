@@ -6,5 +6,21 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  build: {
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('xlsx')) return 'xlsx';
+            if (id.includes('jspdf')) return 'jspdf';
+            if (id.includes('lucide-react')) return 'lucide';
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 });
