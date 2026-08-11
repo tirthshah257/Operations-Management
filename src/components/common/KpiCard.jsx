@@ -1,53 +1,41 @@
 import React from 'react';
 import clsx from 'clsx';
 
-export default function KpiCard({ title, value, subtitle, icon: Icon, color = 'blue', onClick, className }) {
-  const getColorStyle = (c) => {
-    switch (c) {
-      case 'rose':
-      case 'red':
-        return 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border-rose-100 dark:border-rose-900';
-      case 'amber':
-      case 'yellow':
-        return 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-100 dark:border-amber-900';
-      case 'emerald':
-      case 'green':
-        return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900';
-      case 'indigo':
-      case 'purple':
-        return 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900';
-      case 'blue':
-      default:
-        return 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border-blue-100 dark:border-blue-900';
-    }
+export default function KpiCard({ title, value, subtitle, icon: Icon, color = 'blue', onClick }) {
+  const colorMap = {
+    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border-blue-200 dark:border-blue-800/60',
+    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border-amber-200 dark:border-amber-800/60',
+    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60',
+    red: 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border-rose-200 dark:border-rose-800/60',
+    indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/60',
+    violet: 'bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400 border-violet-200 dark:border-violet-800/60'
   };
 
   return (
     <div
       onClick={onClick}
       className={clsx(
-        'p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200',
-        onClick && 'cursor-pointer hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transform hover:-translate-y-0.5',
-        className
+        'p-3.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs transition-all duration-200 flex flex-col justify-between',
+        onClick ? 'cursor-pointer hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 active:scale-[0.98]' : ''
       )}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+        <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider line-clamp-1">
           {title}
         </span>
         {Icon && (
-          <div className={clsx('p-2.5 rounded-lg border', getColorStyle(color))}>
-            <Icon className="w-5 h-5" />
+          <div className={clsx('p-2 rounded-xl border shrink-0', colorMap[color] || colorMap.blue)}>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         )}
       </div>
 
-      <div className="mt-3">
-        <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+      <div>
+        <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
           {value}
-        </div>
+        </h3>
         {subtitle && (
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+          <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
             {subtitle}
           </p>
         )}

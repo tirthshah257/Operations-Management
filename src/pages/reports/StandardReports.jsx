@@ -44,14 +44,14 @@ export default function StandardReports() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-blue-600" />
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             Standard Reports & Enterprise Analytics
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Aggregated metrics, visual charts & client-side Excel / PDF export across all modules
           </p>
         </div>
@@ -59,17 +59,17 @@ export default function StandardReports() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportExcel}
-            className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 hover:bg-slate-50"
+            className="flex-1 sm:flex-initial px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 hover:bg-slate-50"
           >
             <Download className="w-4 h-4 text-emerald-600" />
-            Export Excel
+            <span>Export Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 hover:bg-slate-50"
+            className="flex-1 sm:flex-initial px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 hover:bg-slate-50"
           >
             <Download className="w-4 h-4 text-blue-600" />
-            Export PDF
+            <span>Export PDF</span>
           </button>
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function StandardReports() {
             <button
               key={item.id}
               onClick={() => setSelectedReportType(item.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                 selectedReportType === item.id
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50'

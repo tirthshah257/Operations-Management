@@ -47,21 +47,22 @@ export default function DataTable({
   }, [sortedData, currentPage, itemsPerPage]);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden flex flex-col">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden flex flex-col w-full">
+      {/* Scrollable Container */}
+      <div className="overflow-x-auto w-full max-w-full touch-pan-x">
+        <table className="w-full text-left border-collapse min-w-[600px] sm:min-w-0">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+            <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => col.sortable !== false && handleSort(col.key)}
-                  className={`px-4 py-3.5 ${col.sortable !== false ? 'cursor-pointer hover:text-slate-900 dark:hover:text-white select-none' : ''}`}
+                  className={`px-3 sm:px-4 py-3 sm:py-3.5 ${col.sortable !== false ? 'cursor-pointer hover:text-slate-900 dark:hover:text-white select-none' : ''}`}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     {col.header}
                     {sortColumn === col.key && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-blue-600" /> : <ChevronDown className="w-3.5 h-3.5 text-blue-600" />
+                      sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-600" /> : <ChevronDown className="w-3 h-3 text-blue-600" />
                     )}
                   </div>
                 </th>
@@ -76,7 +77,7 @@ export default function DataTable({
                   className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3.5 font-medium whitespace-nowrap">
+                    <td key={col.key} className="px-3 sm:px-4 py-3 font-medium whitespace-nowrap">
                       {col.render ? col.render(row) : row[col.key] || '—'}
                     </td>
                   ))}
@@ -84,11 +85,11 @@ export default function DataTable({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-12 text-center">
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
                   <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                    <Inbox className="w-10 h-10 mb-2 opacity-50 stroke-[1.5]" />
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">{emptyMessage}</p>
-                    <p className="text-xs text-slate-400 mt-1">Try refining your search or filter options</p>
+                    <Inbox className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-50 stroke-[1.5]" />
+                    <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{emptyMessage}</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Try refining your search or filter options</p>
                   </div>
                 </td>
               </tr>

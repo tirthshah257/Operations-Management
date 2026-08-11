@@ -1,9 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../../context/AppDataContext';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import KpiCard from '../../components/common/KpiCard';
 import ChartCard from '../../components/common/ChartCard';
-import Timeline from '../../components/common/Timeline';
+import StatusBadge from '../../components/common/StatusBadge';
+import PriorityBadge from '../../components/common/PriorityBadge';
+import { formatDateTime } from '../../utils/dateUtils';
 import {
   Ticket,
   AlertTriangle,
@@ -15,243 +18,217 @@ import {
   Receipt,
   Bell,
   Clock,
-  ArrowUpRight,
-  Sparkles
+  ArrowRight
 } from 'lucide-react';
-
 import {
+  BarChart,
+  Bar,
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
-  CartesianGrid,
-  Legend
+  CartesianGrid
 } from 'recharts';
 
 export default function Dashboard() {
-  const { metrics, tickets, assets, projects, expenses, auditLogs } = useAppData();
+  const { tickets, assets, projects, agreements, licenses, stationery, expenses, notifications, auditLogs } = useAppData();
+  const { activeRole } = useAuth();
   const navigate = useNavigate();
 
-  if (!metrics) return null;
+  // Dynamic Metrics
+  const openTicketsCount = tickets.filter(t => t.computedStatus !== 'Closed' && t.computedStatus !== 'Resolved').length;
+  const breachedTicketsCount = tickets.filter(t => t.slaEvaluation && t.slaEvaluation.isOverdue).length;
+  const activeAssetsCount = assets.filter(a => a.status === 'In Use' || a.status === 'Allocated').length;
+  const activeProjectsCount = projects.filter(p => p.status === 'In Progress').length;
+  const expiringAgreementsCount = agreements.filter(a => a.daysUntilExpiry <= 60 && a.daysUntilExpiry >= 0).length;
+  const totalExpenseSum = expenses.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const lowStockItemsCount = stationery.filter(s => s.status === 'Low Stock' || s.status === 'Out of Stock').length;
+  const unreadNotifsCount = notifications.filter(n => !n.read).length;
 
-  // Dynamic Chart 1: Ticket Category Distribution
-  const ticketCategoryData = [
-    { name: 'HVAC', count: tickets.filter(t => t.category.includes('HVAC')).length || 1 },
-    { name: 'Power/UPS', count: tickets.filter(t => t.category.includes('Power')).length || 1 },
-    { name: 'IT Hardware', count: tickets.filter(t => t.category.includes('IT')).length || 2 },
-    { name: 'Network', count: tickets.filter(t => t.category.includes('Network')).length || 1 },
-    { name: 'Furniture', count: tickets.filter(t => t.category.includes('Furniture')).length || 1 },
-    { name: 'General', count: tickets.filter(t => t.category.includes('General')).length || 1 }
+  // Chart Data Formatting
+  const categoryData = [
+    { name: 'Hardware', value: tickets.filter(t => t.category === 'Hardware').length },
+    { name: 'Software', value: tickets.filter(t => t.category === 'Software').length },
+    { name: 'Network', value: tickets.filter(t => t.category === 'Network / WiFi').length },
+    { name: 'Facilities', value: tickets.filter(t => t.category === 'Facilities').length },
+    { name: 'AC / HVAC', value: tickets.filter(t => t.category === 'AC / HVAC').length }
   ];
 
-  // Dynamic Chart 2: Ticket Priority Breakdown
-  const ticketPriorityData = [
-    { name: 'Low', count: tickets.filter(t => t.priority === 'Low').length },
-    { name: 'Medium', count: tickets.filter(t => t.priority === 'Medium').length },
-    { name: 'High', count: tickets.filter(t => t.priority === 'High').length },
-    { name: 'Critical', count: tickets.filter(t => t.priority === 'Critical').length }
+  const priorityData = [
+    { name: 'Critical', count: tickets.filter(t => t.priority === 'Critical').length, color: '#e11d48' },
+    { name: 'High', count: tickets.filter(t => t.priority === 'High').length, color: '#f97316' },
+    { name: 'Medium', count: tickets.filter(t => t.priority === 'Medium').length, color: '#3b82f6' },
+    { name: 'Low', count: tickets.filter(t => t.priority === 'Low').length, color: '#10b981' }
   ];
 
-  // Dynamic Chart 3: Asset Status Spread
-  const assetStatusData = [
-    { name: 'In Use', value: metrics.assets.inUse },
-    { name: 'In Stock', value: metrics.assets.inStock },
-    { name: 'Under Repair', value: metrics.assets.underRepair }
+  const expenseModuleData = [
+    { name: 'Maintenance', total: expenses.filter(e => e.module === 'Maintenance').reduce((s, e) => s + e.amount, 0) },
+    { name: 'Stationery', total: expenses.filter(e => e.module === 'Stationery').reduce((s, e) => s + e.amount, 0) },
+    { name: 'Projects', total: expenses.filter(e => e.module === 'Projects').reduce((s, e) => s + e.amount, 0) },
+    { name: 'Courier', total: expenses.filter(e => e.module === 'Courier').reduce((s, e) => s + e.amount, 0) }
   ];
-  const PIE_COLORS = ['#10b981', '#3b82f6', '#f59e0b'];
 
-  // Dynamic Chart 4: Expense Trend (Module-wise)
-  const expenseTrendData = [
-    { module: 'Maintenance', amount: expenses.filter(e => e.module === 'Maintenance').reduce((sum, e) => sum + e.amount, 0) || 24500 },
-    { module: 'Stationery', amount: expenses.filter(e => e.module === 'Stationery').reduce((sum, e) => sum + e.amount, 0) || 32500 },
-    { module: 'Projects', amount: expenses.filter(e => e.module === 'Projects').reduce((sum, e) => sum + e.amount, 0) || 180000 },
-    { module: 'Courier', amount: expenses.filter(e => e.module === 'Courier').reduce((sum, e) => sum + e.amount, 0) || 1450 }
-  ];
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner Header */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-900 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-semibold backdrop-blur-xs mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Enterprise Operations Dashboard
-          </div>
-          <h2 className="text-xl md:text-2xl font-black tracking-tight">Centralized Management Console</h2>
-          <p className="text-xs text-blue-100 mt-1 max-w-xl font-medium">
-            Dynamic calculation from current React state and localStorage. All metrics update instantly after frontend actions.
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Dynamic calculation from current React state & localStorage ({activeRole} view)
           </p>
-        </div>
-        <div className="flex gap-2.5">
-          <button
-            onClick={() => navigate('/tickets')}
-            className="px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
-          >
-            Create Ticket
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards Grid (2 cols on phone, 4 cols on desktop) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <KpiCard
           title="Open Tickets"
-          value={metrics.tickets.open + metrics.tickets.inProgress}
-          subtitle={`${metrics.tickets.breached} SLA Breached`}
+          value={openTicketsCount}
+          subtitle={`${breachedTicketsCount} breached SLA`}
           icon={Ticket}
           color="blue"
           onClick={() => navigate('/tickets')}
         />
         <KpiCard
           title="SLA Breached"
-          value={metrics.tickets.breached}
-          subtitle="Action required by assigned team"
+          value={breachedTicketsCount}
+          subtitle="Requires immediate escalation"
           icon={AlertTriangle}
           color="red"
           onClick={() => navigate('/tickets')}
         />
         <KpiCard
-          title="Total IT Assets"
-          value={metrics.assets.total}
-          subtitle={`${metrics.assets.inUse} In Use, ${metrics.assets.underRepair} Repair`}
+          title="Active Assets"
+          value={activeAssetsCount}
+          subtitle={`${assets.length} total registered`}
           icon={Laptop}
           color="emerald"
           onClick={() => navigate('/assets')}
         />
         <KpiCard
           title="Active Projects"
-          value={metrics.projects.inProgress}
-          subtitle={`${metrics.projects.total} Total Enterprise Projects`}
+          value={activeProjectsCount}
+          subtitle="In progress milestones"
           icon={FolderKanban}
-          color="purple"
+          color="indigo"
           onClick={() => navigate('/projects')}
         />
         <KpiCard
-          title="Agreements & AMC"
-          value={metrics.agreements.active}
-          subtitle={`${metrics.agreements.expiring} Expiring within 30 days`}
+          title="Expiring AMC / Contracts"
+          value={expiringAgreementsCount}
+          subtitle="Within next 60 days"
           icon={FileCheck2}
-          color="indigo"
+          color="amber"
           onClick={() => navigate('/agreements')}
         />
         <KpiCard
-          title="Software Seats"
-          value={`${metrics.licenses.used} / ${metrics.licenses.total}`}
-          subtitle={`${metrics.licenses.available} Seats Available`}
-          icon={KeyRound}
-          color="blue"
-          onClick={() => navigate('/licenses')}
-        />
-        <KpiCard
-          title="Stationery Stock"
-          value={`${metrics.stationery.lowStock} Low Stock`}
-          subtitle={`Across ${metrics.stationery.totalItems} master inventory items`}
+          title="Low Stock Stationery"
+          value={lowStockItemsCount}
+          subtitle="Below reorder threshold"
           icon={Package}
-          color="amber"
+          color="violet"
           onClick={() => navigate('/stationery')}
         />
         <KpiCard
-          title="Total Expense Ledger"
-          value={`₹${metrics.expenses.totalCost.toLocaleString('en-IN')}`}
-          subtitle="Cross-module recorded costs"
+          title="Total Recorded Expenses"
+          value={`₹${totalExpenseSum.toLocaleString('en-IN')}`}
+          subtitle="Across operational modules"
           icon={Receipt}
-          color="green"
+          color="emerald"
           onClick={() => navigate('/expenses')}
+        />
+        <KpiCard
+          title="Unread Alerts"
+          value={unreadNotifsCount}
+          subtitle="Idempotent alert log"
+          icon={Bell}
+          color="blue"
+          onClick={() => navigate('/notifications')}
         />
       </div>
 
-      {/* Analytics Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chart 1: Ticket Category Distribution */}
-        <ChartCard title="Ticket Breakdown by Category" subtitle="Distribution of complaint types across departments">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={ticketCategoryData}>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <ChartCard title="Tickets by Category" subtitle="Distribution across departments" className="lg:col-span-2">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={categoryData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px' }} />
-              <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Chart 2: Asset Status Spread */}
-        <ChartCard title="Asset Utilization Status" subtitle="Hardware & inventory deployment spread">
-          <ResponsiveContainer width="100%" height={250}>
+        <ChartCard title="Ticket Priorities" subtitle="Urgency classification">
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie
-                data={assetStatusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={4}
-                dataKey="value"
-              >
-                {assetStatusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+              <Pie data={priorityData} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={70} label>
+                {priorityData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px' }} />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              <Tooltip />
             </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        {/* Chart 3: Ticket Priority Spread */}
-        <ChartCard title="Tickets by Priority Level" subtitle="SLA priority classification">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={ticketPriorityData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-              <XAxis type="number" tick={{ fontSize: 11 }} />
-              <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px' }} />
-              <Bar dataKey="count" fill="#6366f1" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        {/* Chart 4: Module Expenses */}
-        <ChartCard title="Module Expense Ledgers" subtitle="Expense allocation by module type">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={expenseTrendData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="module" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px' }} formatter={(val) => [`₹${val}`, 'Amount']} />
-              <Bar dataKey="amount" fill="#10b981" radius={[6, 6, 0, 0]} />
-            </BarChart>
           </ResponsiveContainer>
         </ChartCard>
       </div>
 
-      {/* Global Activity Timeline Stream */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-600" />
-              Global Recent Activity Stream
-            </h3>
-            <p className="text-xs text-slate-500">Append-only log simulation of operational actions across all system modules</p>
+      {/* Recent Activity & Recent Tickets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Recent Tickets Table */}
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Recent Urgent Tickets</h3>
+            <button onClick={() => navigate('/tickets')} className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+              View All <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/audit-logs')}
-            className="text-xs font-bold text-blue-600 hover:underline"
-          >
-            View Full Audit Logs ({auditLogs.length})
-          </button>
+          <div className="space-y-2">
+            {tickets.slice(0, 4).map(t => (
+              <div key={t.id} className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between text-xs gap-2">
+                <div className="min-w-0 flex-1">
+                  <span className="font-bold text-blue-600">{t.ticketNumber}</span>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{t.subject}</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <PriorityBadge priority={t.priority} />
+                  <StatusBadge status={t.computedStatus || t.status} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <Timeline events={auditLogs.slice(0, 5)} />
+        {/* Global Activity Stream */}
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">System Activity Stream</h3>
+            <button onClick={() => navigate('/audit-logs')} className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+              Audit Logs <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+            {auditLogs.slice(0, 5).map(log => (
+              <div key={log.id} className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/20 space-y-0.5">
+                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{log.user} ({log.role})</span>
+                  <span>{formatDateTime(log.timestamp)}</span>
+                </div>
+                <p className="text-slate-800 dark:text-slate-200 font-medium truncate">{log.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

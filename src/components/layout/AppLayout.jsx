@@ -1,28 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { Outlet } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
+import clsx from 'clsx';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
 export default function AppLayout() {
   const { toasts, removeToast } = useToast();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex font-sans">
-      <Sidebar />
+      <Sidebar
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pl-16 md:pl-64 transition-all duration-300">
-        <Header />
-        
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+      <div
+        className={clsx(
+          'flex-1 flex flex-col min-w-0 transition-all duration-300',
+          // Desktop margins:
+          collapsed ? 'md:pl-16' : 'md:pl-64',
+          // Mobile padding (0 margin since sidebar is overlay drawer on mobile):
+          'pl-0'
+        )}
+      >
+        <Header onMobileToggle={() => setMobileOpen(prev => !prev)} />
+
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>
 
       {/* Toast Notifications Overlay Container */}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full">
+      <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-xs sm:max-w-sm w-full px-3 sm:px-0">
         {toasts.map((toast) => (
           <div
             key={toast.id}
