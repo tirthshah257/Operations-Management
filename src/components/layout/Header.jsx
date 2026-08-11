@@ -47,30 +47,31 @@ export default function Header({ onMobileToggle }) {
   const searchResults = filteredSearchResults();
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between transition-colors">
-      {/* Mobile Hamburger & Search */}
-      <div className="flex items-center gap-2 sm:gap-3">
+    <header className="sticky top-0 z-30 h-16 w-full max-w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-2.5 sm:px-6 flex items-center justify-between transition-colors overflow-hidden">
+      {/* Left: Mobile Hamburger & Search */}
+      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
         <button
           onClick={onMobileToggle}
-          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden"
+          className="p-1.5 sm:p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden shrink-0"
           title="Open Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
+        {/* Compact Search Button for Phone / Expanded Bar for Tablet & Desktop */}
         <button
           onClick={() => setShowSearchModal(true)}
-          className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs w-36 sm:w-64 md:w-72 transition-colors"
+          className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs sm:w-60 md:w-72 transition-colors shrink-0"
         >
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
-          <span className="truncate">Search (Tickets, Assets)...</span>
+          <span className="truncate hidden sm:inline">Search (Tickets, Assets)...</span>
           <kbd className="hidden md:inline-block ml-auto text-[10px] bg-white dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600 text-slate-400 font-mono">
             ⌘K
           </kbd>
         </button>
 
-        {/* Global Location Filter */}
-        <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+        {/* Global Location Filter (Desktop only) */}
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
           <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           <select
             value={locationFilter}
@@ -86,37 +87,37 @@ export default function Header({ onMobileToggle }) {
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Active Role Switcher Badge */}
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(prev => !prev)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-bold hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[11px] sm:text-xs font-bold hover:bg-blue-100 transition-colors"
           >
             <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span className="truncate max-w-[80px] sm:max-w-none">{activeRole}</span>
-            <ChevronDown className="w-3 h-3 opacity-75 shrink-0" />
+            <span className="truncate max-w-[65px] sm:max-w-none">{activeRole}</span>
+            <ChevronDown className="w-3 h-3 opacity-75 shrink-0 hidden sm:inline" />
           </button>
         </div>
 
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
           title="Toggle Theme"
         >
           {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
 
         {/* Notifications Dropdown Bell */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             onClick={() => setShowNotifDropdown(prev => !prev)}
             className="relative p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <Bell className="w-4 h-4" />
             {unreadNotifsCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+              <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
                 {unreadNotifsCount}
               </span>
             )}
@@ -162,16 +163,16 @@ export default function Header({ onMobileToggle }) {
           )}
         </div>
 
-        {/* User Profile Avatar Dropdown */}
-        <div className="relative">
+        {/* User Profile Avatar Dropdown (ALWAYS Fully Visible) */}
+        <div className="relative shrink-0">
           <button
             onClick={() => setShowProfileMenu(prev => !prev)}
-            className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <img
               src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'}
               alt="Avatar"
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-blue-500/30 shrink-0"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-blue-500/40 shrink-0"
             />
             <div className="hidden lg:block text-left">
               <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{currentUser?.name}</p>
@@ -180,11 +181,11 @@ export default function Header({ onMobileToggle }) {
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-2 space-y-1">
-              <div className="p-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="absolute right-0 mt-2 w-60 sm:w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-2 space-y-1">
+              <div className="p-2.5 border-b border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-900 dark:text-white">{currentUser?.name}</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">{currentUser?.email}</p>
-                <span className="inline-block mt-1.5 px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{currentUser?.email}</p>
+                <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold">
                   Role: {activeRole}
                 </span>
               </div>
@@ -210,7 +211,7 @@ export default function Header({ onMobileToggle }) {
 
       {/* Global Search Overlay Modal */}
       {showSearchModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-start justify-center pt-10 sm:pt-20 p-3 sm:p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-start justify-center pt-6 sm:pt-20 p-3 sm:p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col">
             <div className="p-3 sm:p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
               <Search className="w-5 h-5 text-blue-500 shrink-0" />
@@ -219,8 +220,8 @@ export default function Header({ onMobileToggle }) {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Tickets, Assets, Projects, Vendors..."
-                className="w-full bg-transparent text-sm text-slate-900 dark:text-white focus:outline-none placeholder-slate-400"
+                placeholder="Search Tickets, Assets, Projects..."
+                className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none placeholder-slate-400"
               />
               <button onClick={() => setShowSearchModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
@@ -256,22 +257,6 @@ export default function Header({ onMobileToggle }) {
                           className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-xs"
                         >
                           <span className="font-semibold text-slate-800 dark:text-slate-200">{a.assetId} — {a.make} {a.model}</span>
-                          <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {searchResults.projects.length > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Projects</p>
-                      {searchResults.projects.map(p => (
-                        <div
-                          key={p.id}
-                          onClick={() => { setShowSearchModal(false); navigate('/projects'); }}
-                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-xs"
-                        >
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{p.projectCode} — {p.projectName}</span>
                           <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                         </div>
                       ))}
