@@ -109,7 +109,7 @@ export default function LicenseList() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold mb-1">License Vendor</label>
               <select
@@ -134,7 +134,7 @@ export default function LicenseList() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold mb-1">Total Quantity Seats</label>
               <input

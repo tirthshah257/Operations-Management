@@ -151,7 +151,7 @@ export default function ComplaintMatrix() {
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingRule ? 'Edit Complaint Matrix Rule' : 'Add New Complaint Matrix Rule'}>
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold mb-1">Category</label>
               <input
@@ -225,7 +225,7 @@ export default function ComplaintMatrix() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold mb-1">Responsible Team</label>
               <select
