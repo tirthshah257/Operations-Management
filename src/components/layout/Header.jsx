@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAppData } from '../../context/AppDataContext';
 import { useNavigate } from 'react-router-dom';
 import RoleSwitcher from './RoleSwitcher';
+import { useToast } from '../../context/ToastContext';
 import {
   Menu,
   Search,
@@ -15,13 +16,16 @@ import {
   LogOut,
   MapPin,
   ExternalLink,
-  X
+  X,
+  User,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Header({ onMobileToggle }) {
-  const { currentUser, activeRole, locationFilter, setLocationFilter, logoutDemo } = useAuth();
+  const { currentUser, activeRole, switchActiveUser, locationFilter, setLocationFilter, logoutDemo } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { notifications, tickets, assets, projects, vendors, locations } = useAppData();
+  const { notifications, tickets, assets, projects, vendors, locations, refreshAllState } = useAppData();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,9 +50,16 @@ export default function Header({ onMobileToggle }) {
 
   const searchResults = filteredSearchResults();
 
+  const handleSwitchToSuperAdmin = () => {
+    switchActiveUser('USR-001');
+    refreshAllState();
+    setShowProfileMenu(false);
+    addToast('Switched session to Super Admin (System Administrator)', 'success');
+  };
+
   return (
-    <header className="sticky top-0 z-30 h-16 w-full max-w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-2.5 sm:px-6 flex items-center justify-between transition-colors overflow-hidden">
-      {/* Left: Mobile Hamburger & Search */}
+    <header className="sticky top-0 z-40 h-16 w-full max-w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-2.5 sm:px-6 flex items-center justify-between transition-colors">
+      {/* Left: Mobile Hamburger & Search & Location Filter */}
       <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
         <button
           onClick={onMobileToggle}
@@ -70,17 +81,19 @@ export default function Header({ onMobileToggle }) {
           </kbd>
         </button>
 
-        {/* Global Location Filter (Desktop only) */}
-        <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
+        {/* Global Location Filter (Desktop only - Dark Mode Fixed) */}
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
           <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className="bg-transparent text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+            className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer"
           >
-            <option value="ALL">All Locations</option>
+            <option value="ALL" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium">All Locations</option>
             {locations.map(loc => (
-              <option key={loc.id} value={loc.id}>{loc.name}</option>
+              <option key={loc.id} value={loc.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium">
+                {loc.name}
+              </option>
             ))}
           </select>
         </div>
@@ -88,23 +101,21 @@ export default function Header({ onMobileToggle }) {
 
       {/* Right Controls */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        {/* Active Role Switcher Badge */}
-        <div className="relative">
-          <button
-            onClick={() => setShowProfileMenu(prev => !prev)}
-            className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[11px] sm:text-xs font-bold hover:bg-blue-100 transition-colors"
-          >
-            <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span className="truncate max-w-[65px] sm:max-w-none">{activeRole}</span>
-            <ChevronDown className="w-3 h-3 opacity-75 shrink-0 hidden sm:inline" />
-          </button>
-        </div>
+        {/* Active Role Indicator Badge (Informational - Navigates to Roles or Profile) */}
+        <button
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-1 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800/80 bg-blue-50/90 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[11px] sm:text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+          title="Active Permission Role (Click to view Profile)"
+        >
+          <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+          <span className="truncate max-w-[75px] sm:max-w-none">{activeRole}</span>
+        </button>
 
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleTheme}
           className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-          title="Toggle Theme"
+          title="Toggle Dark / Light Theme"
         >
           {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
@@ -112,8 +123,12 @@ export default function Header({ onMobileToggle }) {
         {/* Notifications Dropdown Bell */}
         <div className="relative shrink-0">
           <button
-            onClick={() => setShowNotifDropdown(prev => !prev)}
+            onClick={() => {
+              setShowNotifDropdown(prev => !prev);
+              setShowProfileMenu(false);
+            }}
             className="relative p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Notifications Alert Bell"
           >
             <Bell className="w-4 h-4" />
             {unreadNotifsCount > 0 && (
@@ -124,7 +139,7 @@ export default function Header({ onMobileToggle }) {
           </button>
 
           {showNotifDropdown && (
-            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-3 space-y-2">
+            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 p-3 space-y-2">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Notifications</span>
                 <button
@@ -132,7 +147,7 @@ export default function Header({ onMobileToggle }) {
                     setShowNotifDropdown(false);
                     navigate('/notifications');
                   }}
-                  className="text-[11px] font-semibold text-blue-600 hover:underline"
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   View All ({notifications.length})
                 </button>
@@ -163,11 +178,15 @@ export default function Header({ onMobileToggle }) {
           )}
         </div>
 
-        {/* User Profile Avatar Dropdown (ALWAYS Fully Visible) */}
+        {/* User Profile Avatar Menu (Single Clear Entrypoint) */}
         <div className="relative shrink-0">
           <button
-            onClick={() => setShowProfileMenu(prev => !prev)}
+            onClick={() => {
+              setShowProfileMenu(prev => !prev);
+              setShowNotifDropdown(false);
+            }}
             className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="User Profile Menu"
           >
             <img
               src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'}
@@ -178,17 +197,44 @@ export default function Header({ onMobileToggle }) {
               <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{currentUser?.name}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{currentUser?.email}</p>
             </div>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden lg:block" />
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-60 sm:w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-2 space-y-1">
+            <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2.5 space-y-2">
               <div className="p-2.5 border-b border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-bold text-slate-900 dark:text-white">{currentUser?.name}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentUser?.name}</p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{currentUser?.email}</p>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold">
+                <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold">
                   Role: {activeRole}
                 </span>
               </div>
+
+              {/* Navigation to Full Profile Page */}
+              <button
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  navigate('/profile');
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-extrabold text-xs transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  View & Edit My Profile Page
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 -rotate-90 opacity-70" />
+              </button>
+
+              {/* Quick Super Admin Switch Button */}
+              {activeRole !== 'Super Admin' && (
+                <button
+                  onClick={handleSwitchToSuperAdmin}
+                  className="w-full flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-bold text-xs transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  Quick Switch to Super Admin
+                </button>
+              )}
 
               <RoleSwitcher />
 
@@ -196,9 +242,10 @@ export default function Header({ onMobileToggle }) {
                 <button
                   onClick={() => {
                     logoutDemo();
+                    setShowProfileMenu(false);
                     navigate('/login');
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out Demo

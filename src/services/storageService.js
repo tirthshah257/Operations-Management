@@ -54,43 +54,54 @@ const STORAGE_KEYS = {
   CUSTOM_REMINDERS: 'ems_custom_reminders'
 };
 
+const SEED_DEFAULTS = {
+  [STORAGE_KEYS.USERS]: DEFAULT_USERS,
+  [STORAGE_KEYS.ROLES]: DEFAULT_ROLES,
+  [STORAGE_KEYS.DEPARTMENTS]: DEFAULT_DEPARTMENTS,
+  [STORAGE_KEYS.LOCATIONS]: DEFAULT_LOCATIONS,
+  [STORAGE_KEYS.TEAMS]: DEFAULT_TEAMS,
+  [STORAGE_KEYS.VENDORS]: DEFAULT_VENDORS,
+  [STORAGE_KEYS.COMPLAINT_MATRIX]: DEFAULT_COMPLAINT_MATRIX,
+  [STORAGE_KEYS.ESCALATION_MATRIX]: DEFAULT_ESCALATION_MATRIX,
+  [STORAGE_KEYS.SETTINGS]: DEFAULT_SETTINGS,
+  [STORAGE_KEYS.TICKETS]: INITIAL_TICKETS,
+  [STORAGE_KEYS.ASSETS]: INITIAL_ASSETS,
+  [STORAGE_KEYS.PROJECTS]: INITIAL_PROJECTS,
+  [STORAGE_KEYS.AGREEMENTS]: INITIAL_AGREEMENTS,
+  [STORAGE_KEYS.LICENSES]: INITIAL_LICENSES,
+  [STORAGE_KEYS.STATIONERY]: INITIAL_STATIONERY,
+  [STORAGE_KEYS.EXPENSES]: INITIAL_EXPENSES,
+  [STORAGE_KEYS.INWARD]: INITIAL_INWARD,
+  [STORAGE_KEYS.OUTWARD]: INITIAL_OUTWARD,
+  [STORAGE_KEYS.COURIER]: INITIAL_COURIER,
+  [STORAGE_KEYS.MAINTENANCE]: INITIAL_MAINTENANCE,
+  [STORAGE_KEYS.FAQS]: INITIAL_FAQS,
+  [STORAGE_KEYS.AUDIT_LOGS]: INITIAL_AUDIT_LOGS,
+  [STORAGE_KEYS.NOTIFICATIONS]: INITIAL_NOTIFICATIONS,
+  [STORAGE_KEYS.CUSTOM_REMINDERS]: []
+};
+
 export const storageService = {
   KEYS: STORAGE_KEYS,
 
   initializeSeedData(force = false) {
-    if (force || !localStorage.getItem(STORAGE_KEYS.USERS)) {
-      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(DEFAULT_USERS));
-      localStorage.setItem(STORAGE_KEYS.ROLES, JSON.stringify(DEFAULT_ROLES));
-      localStorage.setItem(STORAGE_KEYS.DEPARTMENTS, JSON.stringify(DEFAULT_DEPARTMENTS));
-      localStorage.setItem(STORAGE_KEYS.LOCATIONS, JSON.stringify(DEFAULT_LOCATIONS));
-      localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(DEFAULT_TEAMS));
-      localStorage.setItem(STORAGE_KEYS.VENDORS, JSON.stringify(DEFAULT_VENDORS));
-      localStorage.setItem(STORAGE_KEYS.COMPLAINT_MATRIX, JSON.stringify(DEFAULT_COMPLAINT_MATRIX));
-      localStorage.setItem(STORAGE_KEYS.ESCALATION_MATRIX, JSON.stringify(DEFAULT_ESCALATION_MATRIX));
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
-      
-      localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(INITIAL_TICKETS));
-      localStorage.setItem(STORAGE_KEYS.ASSETS, JSON.stringify(INITIAL_ASSETS));
-      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(INITIAL_PROJECTS));
-      localStorage.setItem(STORAGE_KEYS.AGREEMENTS, JSON.stringify(INITIAL_AGREEMENTS));
-      localStorage.setItem(STORAGE_KEYS.LICENSES, JSON.stringify(INITIAL_LICENSES));
-      localStorage.setItem(STORAGE_KEYS.STATIONERY, JSON.stringify(INITIAL_STATIONERY));
-      localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(INITIAL_EXPENSES));
-      localStorage.setItem(STORAGE_KEYS.INWARD, JSON.stringify(INITIAL_INWARD));
-      localStorage.setItem(STORAGE_KEYS.OUTWARD, JSON.stringify(INITIAL_OUTWARD));
-      localStorage.setItem(STORAGE_KEYS.COURIER, JSON.stringify(INITIAL_COURIER));
-      localStorage.setItem(STORAGE_KEYS.MAINTENANCE, JSON.stringify(INITIAL_MAINTENANCE));
-      localStorage.setItem(STORAGE_KEYS.FAQS, JSON.stringify(INITIAL_FAQS));
-      localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(INITIAL_AUDIT_LOGS));
-      localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
-      localStorage.setItem(STORAGE_KEYS.CUSTOM_REMINDERS, JSON.stringify([]));
-    }
+    Object.entries(SEED_DEFAULTS).forEach(([key, defaultValue]) => {
+      if (force || !localStorage.getItem(key)) {
+        localStorage.setItem(key, JSON.stringify(defaultValue));
+      }
+    });
   },
 
   getItem(key, defaultValue = []) {
     try {
       const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : defaultValue;
+      if (data) return JSON.parse(data);
+      // If missing, initialize from seed defaults if available
+      if (SEED_DEFAULTS[key]) {
+        localStorage.setItem(key, JSON.stringify(SEED_DEFAULTS[key]));
+        return SEED_DEFAULTS[key];
+      }
+      return defaultValue;
     } catch (err) {
       console.error(`Error reading ${key} from localStorage`, err);
       return defaultValue;

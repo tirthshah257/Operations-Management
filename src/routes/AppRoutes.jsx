@@ -28,6 +28,7 @@ import TeamList from '../pages/teams/TeamList';
 import VendorList from '../pages/vendors/VendorList';
 import AuditLogs from '../pages/audit/AuditLogs';
 import SettingsPage from '../pages/settings/SettingsPage';
+import ProfilePage from '../pages/auth/ProfilePage';
 
 export default function AppRoutes() {
   return (
@@ -37,6 +38,7 @@ export default function AppRoutes() {
 
       <Route element={<AppLayout />}>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="profile" element={<ProfilePage />} />
         <Route path="tickets" element={<TicketList />} />
         <Route path="complaint-matrix" element={<ComplaintMatrix />} />
         <Route path="knowledge-base" element={<KnowledgeBase />} />

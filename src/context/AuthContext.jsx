@@ -6,8 +6,19 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('ems_current_user');
-    return saved ? JSON.parse(saved) : userService.getUsers()[0] || null;
+    try {
+      const saved = localStorage.getItem('ems_current_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Verify user still exists in userService
+        const users = userService.getUsers();
+        const found = users.find(u => u.id === parsed.id || u.email === parsed.email);
+        if (found) return found;
+      }
+    } catch (e) {
+      console.error('Error loading current user', e);
+    }
+    return userService.getUsers()[0] || null;
   });
 
   const [activeRole, setActiveRole] = useState(() => {
@@ -24,25 +35,50 @@ export const AuthProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  // Switch to a specific user by ID or Email
+  const switchActiveUser = (userIdOrEmail) => {
+    const users = userService.getUsers();
+    const target = users.find(
+      u => u.id === userIdOrEmail || u.email.toLowerCase() === String(userIdOrEmail).toLowerCase()
+    );
+
+    if (target) {
+      setCurrentUser(target);
+      setActiveRole(target.role);
+      localStorage.setItem('ems_current_user', JSON.stringify(target));
+      return target;
+    }
+    return null;
+  };
+
+  // Switch role: preferably switch to a real user matching that role, or update current user's role
   const switchUserRole = (newRole) => {
-    setActiveRole(newRole);
-    if (currentUser) {
-      const updated = { ...currentUser, role: newRole };
+    const users = userService.getUsers();
+    const matchingUser = users.find(u => u.role === newRole);
+
+    if (matchingUser) {
+      setCurrentUser(matchingUser);
+      setActiveRole(matchingUser.role);
+      localStorage.setItem('ems_current_user', JSON.stringify(matchingUser));
+    } else if (currentUser) {
+      const updated = userService.updateUser(currentUser.id, { role: newRole }) || { ...currentUser, role: newRole };
       setCurrentUser(updated);
+      setActiveRole(newRole);
+      localStorage.setItem('ems_current_user', JSON.stringify(updated));
+    } else {
+      setActiveRole(newRole);
     }
   };
 
   const loginDemo = (email) => {
-    const users = userService.getUsers();
-    const found = users.find(u => u.email.toLowerCase() === email.toLowerCase()) || users[0];
-    setCurrentUser(found);
-    setActiveRole(found.role);
-    return found;
+    return switchActiveUser(email) || (userService.getUsers()[0] || null);
   };
 
   const logoutDemo = () => {
     localStorage.removeItem('ems_current_user');
-    setCurrentUser(null);
+    const defaultUser = userService.getUsers()[0] || null;
+    setCurrentUser(defaultUser);
+    if (defaultUser) setActiveRole(defaultUser.role);
   };
 
   const hasPermission = (permission) => {
@@ -59,6 +95,7 @@ export const AuthProvider = ({ children }) => {
         currentUser,
         setCurrentUser,
         activeRole,
+        switchActiveUser,
         switchUserRole,
         loginDemo,
         logoutDemo,

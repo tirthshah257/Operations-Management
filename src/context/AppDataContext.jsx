@@ -17,6 +17,10 @@ import { vendorService } from '../services/vendorService';
 import { auditService } from '../services/auditService';
 import { complaintMatrixService } from '../services/complaintMatrixService';
 import { reportService } from '../services/reportService';
+import { faqService } from '../services/faqService';
+import { inwardService } from '../services/inwardService';
+import { outwardService } from '../services/outwardService';
+import { courierService } from '../services/courierService';
 
 const AppDataContext = createContext();
 
@@ -38,6 +42,10 @@ export const AppDataProvider = ({ children }) => {
   const [auditLogs, setAuditLogs] = useState([]);
   const [complaintMatrix, setComplaintMatrix] = useState([]);
   const [metrics, setMetrics] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [inward, setInward] = useState([]);
+  const [outward, setOutward] = useState([]);
+  const [courier, setCourier] = useState([]);
 
   const refreshAllState = useCallback(() => {
     storageService.initializeSeedData();
@@ -58,6 +66,10 @@ export const AppDataProvider = ({ children }) => {
     setAuditLogs(auditService.getAuditLogs());
     setComplaintMatrix(complaintMatrixService.getRules());
     setMetrics(reportService.getDashboardMetrics());
+    setFaqs(faqService.getFaqs());
+    setInward(inwardService.getInwardLogs());
+    setOutward(outwardService.getOutwardLogs());
+    setCourier(courierService.getCouriers());
   }, []);
 
   useEffect(() => {
@@ -84,6 +96,10 @@ export const AppDataProvider = ({ children }) => {
         auditLogs,
         complaintMatrix,
         metrics,
+        faqs,
+        inward,
+        outward,
+        courier,
         refreshAllState
       }}
     >

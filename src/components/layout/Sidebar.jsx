@@ -87,7 +87,8 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, onMobileC
         { name: 'Vendors', path: '/vendors', icon: Store },
         { name: 'Audit Logs', path: '/audit-logs', icon: History },
         { name: 'Notifications & Reminders', path: '/notifications', icon: Bell },
-        { name: 'Configuration / Settings', path: '/settings', icon: Settings }
+        { name: 'Configuration / Settings', path: '/settings', icon: Settings },
+        { name: 'My Profile & Account', path: '/profile', icon: Users }
       ]
     }
   ];
@@ -97,6 +98,8 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, onMobileC
     if (activeRole === 'Super Admin' || activeRole === 'Admin') return items;
 
     return items.filter(item => {
+      if (item.name === 'My Profile & Account') return true;
+
       if (activeRole === 'End User') {
         return ['Dashboard', 'Tickets', 'IT Assets', 'Knowledge Base'].includes(item.name);
       }
