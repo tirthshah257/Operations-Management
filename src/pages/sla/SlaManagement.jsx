@@ -90,7 +90,7 @@ export default function SlaManagement() {
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
             <p className="font-bold text-rose-600">Level 4</p>
-            <p className="font-bold text-slate-800 dark:text-slate-200">System Administrator</p>
+            <p className="font-bold text-slate-800 dark:text-slate-200">Meteoric 360</p>
             <p className="text-[10px] text-slate-400 mt-1">Trigger: Overdue by +12 Hours</p>
           </div>
         </div>

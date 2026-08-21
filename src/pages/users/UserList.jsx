@@ -97,7 +97,7 @@ export default function UserList() {
     {
       header: 'Role',
       key: 'role',
-      render: (row) => <span className="font-extrabold text-blue-600 dark:text-blue-400">{row.role}</span>
+      render: (row) => <span className="font-extrabold text-blue-600 dark:text-blue-400">{row.role === 'Super Admin' ? 'Meteoric 360' : row.role}</span>
     },
     {
       header: 'Department',
@@ -210,7 +210,7 @@ export default function UserList() {
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-blue-600"
               >
-                <option value="Super Admin">Super Admin</option>
+                <option value="Super Admin">Meteoric 360</option>
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
                 <option value="IT Admin">IT Admin</option>
@@ -288,7 +288,7 @@ export default function UserList() {
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-blue-600"
                 >
-                  <option value="Super Admin">Super Admin</option>
+                  <option value="Super Admin">Meteoric 360</option>
                   <option value="Admin">Admin</option>
                   <option value="Manager">Manager</option>
                   <option value="IT Admin">IT Admin</option>

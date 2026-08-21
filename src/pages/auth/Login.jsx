@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Shield, Lock, Mail, ArrowRight, Sparkles } from 'lucide-react';
+import MeteoricLogo from '../../components/common/MeteoricLogo';
+import { Shield, Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('admin@enterprise.com');
@@ -16,30 +17,24 @@ export default function Login() {
   };
 
   const quickRoles = [
-    { role: 'Super Admin', email: 'admin@enterprise.com' },
-    { role: 'IT Admin', email: 'rahul.mehta@enterprise.com' },
-    { role: 'Manager', email: 'priya.sharma@enterprise.com' },
-    { role: 'Technician', email: 'amit.joshi@enterprise.com' },
-    { role: 'End User', email: 'neha.gupta@enterprise.com' },
-    { role: 'Inventory Manager', email: 'ramesh.patel@enterprise.com' },
+    { role: 'Super Admin', displayRole: 'Meteoric 360', email: 'admin@enterprise.com' },
+    { role: 'IT Admin', displayRole: 'Mithun — IT Admin', email: 'mithun@enterprise.com' },
+    { role: 'Admin', displayRole: 'Kiran Patel — Admin', email: 'kiran.patel@enterprise.com' },
+    { role: 'End User', displayRole: 'Neha Gupta — User', email: 'neha.gupta@enterprise.com' },
+    { role: 'Manager', displayRole: 'Manager', email: 'priya.sharma@enterprise.com' },
+    { role: 'Technician', displayRole: 'Technician', email: 'amit.joshi@enterprise.com' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-800/90 border border-slate-700/80 rounded-2xl p-8 shadow-2xl backdrop-blur-md">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-500/30">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-white">Enterprise SaaS</h1>
-            <p className="text-xs text-blue-400 font-semibold">Asset & Ticketing Portal</p>
-          </div>
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-md space-y-6">
+        <div className="flex items-center justify-center py-2">
+          <MeteoricLogo className="h-10" />
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">Email Address</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -47,13 +42,13 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -61,7 +56,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors font-medium"
               />
             </div>
           </div>
@@ -76,34 +71,34 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all"
+            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all"
           >
-            Sign In Demo
+            Sign In to Meteoric 360
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-700/60">
+        <div className="pt-4 border-t border-slate-800">
           <button
             onClick={() => { loginDemo('admin@enterprise.com'); navigate('/dashboard'); }}
-            className="w-full py-2 bg-slate-700/60 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors border border-slate-600"
+            className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors border border-slate-700"
           >
             <Shield className="w-4 h-4 text-blue-400" />
-            Sign In with Single Sign-On (SSO Demo)
+            Sign In with SSO Demo (Meteoric 360)
           </button>
         </div>
 
         {/* Quick Role Fill Demo Buttons */}
-        <div className="mt-6">
+        <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Quick Demo Account Selector</p>
           <div className="grid grid-cols-2 gap-2">
             {quickRoles.map(item => (
               <button
                 key={item.role}
                 onClick={() => { setEmail(item.email); loginDemo(item.email); navigate('/dashboard'); }}
-                className="p-2 bg-slate-900/60 hover:bg-slate-700/50 border border-slate-700/60 rounded-lg text-[11px] font-semibold text-slate-300 text-left transition-colors"
+                className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-[11px] font-semibold text-slate-300 text-left transition-colors"
               >
-                <div className="font-bold text-blue-400">{item.role}</div>
+                <div className="font-extrabold text-blue-400 truncate">{item.displayRole}</div>
                 <div className="text-[10px] text-slate-400 truncate">{item.email}</div>
               </button>
             ))}

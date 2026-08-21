@@ -100,9 +100,28 @@ export const storageService = {
         }
         if (key === STORAGE_KEYS.USERS) {
           try {
-            const parsed = JSON.parse(existing);
-            if (!parsed.some(u => u.name.includes('Mithun'))) {
-              localStorage.setItem(key, JSON.stringify(defaultValue));
+            let parsed = JSON.parse(existing);
+            let updated = false;
+            parsed = parsed.map(u => {
+              if (u.id === 'USR-001' || u.name === 'System Administrator') {
+                updated = true;
+                return { ...u, name: 'Meteoric 360' };
+              }
+              return u;
+            });
+            if (updated || !parsed.some(u => u.name.includes('Mithun'))) {
+              localStorage.setItem(key, JSON.stringify(parsed));
+            }
+          } catch (e) {}
+
+          // Also sanitize active current user session if set to System Administrator
+          try {
+            const savedUser = localStorage.getItem('ems_current_user');
+            if (savedUser) {
+              const uObj = JSON.parse(savedUser);
+              if (uObj.id === 'USR-001' || uObj.name === 'System Administrator') {
+                localStorage.setItem('ems_current_user', JSON.stringify({ ...uObj, name: 'Meteoric 360' }));
+              }
             }
           } catch (e) {}
         }

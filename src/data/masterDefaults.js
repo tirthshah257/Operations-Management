@@ -36,7 +36,7 @@ export const DEFAULT_VENDORS = [
 ];
 
 export const DEFAULT_USERS = [
-  { id: 'USR-001', name: 'System Administrator', email: 'admin@enterprise.com', role: 'Super Admin', roleId: 'ROLE-001', departmentId: 'DEPT-001', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-001', name: 'Meteoric 360', email: 'admin@enterprise.com', role: 'Super Admin', roleId: 'ROLE-001', departmentId: 'DEPT-001', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-002', name: 'Kiran Patel', email: 'kiran.patel@enterprise.com', role: 'Admin', roleId: 'ROLE-002', departmentId: 'DEPT-002', locationId: 'LOC-005', status: 'Active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-003', name: 'Priya Sharma', email: 'priya.sharma@enterprise.com', role: 'Manager', roleId: 'ROLE-003', departmentId: 'DEPT-002', locationId: 'LOC-002', status: 'Active', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-004', name: 'Mithun Parmar', email: 'mithun@enterprise.com', role: 'IT Admin', roleId: 'ROLE-004', departmentId: 'DEPT-001', locationId: 'LOC-005', status: 'Active', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
@@ -81,8 +81,8 @@ export const DEFAULT_ESCALATION_MATRIX = [
 
 export const DEFAULT_SETTINGS = {
   general: {
-    companyName: 'Enterprise SaaS Solutions Ltd',
-    systemTitle: 'Asset & Ticketing Management Portal',
+    companyName: 'Meteoric Biopharmaceuticals',
+    systemTitle: 'Meteoric 360 Operations Portal',
     currency: 'INR (₹)',
     dateFormat: 'DD/MM/YYYY',
     timeFormat: '12-Hour (AM/PM)',

@@ -5,7 +5,7 @@ export const auditService = {
     return storageService.getItem(storageService.KEYS.AUDIT_LOGS, []);
   },
 
-  logAction({ user = 'System Administrator', role = 'Admin', module, action, recordId, description, previousValue = null, newValue = null }) {
+  logAction({ user = 'Meteoric 360', role = 'Admin', module, action, recordId, description, previousValue = null, newValue = null }) {
     const logs = this.getAuditLogs();
     const newLog = {
       id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,

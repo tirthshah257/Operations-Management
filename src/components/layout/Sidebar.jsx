@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import MeteoricLogo from '../common/MeteoricLogo';
 import clsx from 'clsx';
 import {
   LayoutDashboard,
@@ -141,23 +142,21 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, onMobileC
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 shrink-0">
-          {(!collapsed || mobileOpen) && (
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-500/20">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <h1 className="text-xs font-black text-white tracking-wider uppercase leading-none">Enterprise</h1>
-                <p className="text-[10px] text-blue-400 font-semibold tracking-tight mt-0.5">Asset & Ticketing</p>
-              </div>
+        <div className="h-16 relative flex items-center justify-center px-3 border-b border-slate-800 shrink-0">
+          {(!collapsed || mobileOpen) ? (
+            <div className="w-full flex items-center justify-center px-4">
+              <MeteoricLogo className="h-7" centered={true} />
+            </div>
+          ) : (
+            <div className="mx-auto bg-white p-1 rounded-xl shadow-sm flex items-center justify-center">
+              <img src="/meteoric-new-logo.png" alt="Meteoric" className="h-5 w-5 object-contain" />
             </div>
           )}
 
           {/* Close button for mobile */}
           <button
             onClick={onMobileClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 md:hidden"
+            className="absolute right-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 md:hidden"
           >
             <X className="w-5 h-5" />
           </button>
@@ -165,7 +164,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, onMobileC
           {/* Collapse button for desktop */}
           <button
             onClick={() => setCollapsed(prev => !prev)}
-            className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="absolute right-2 hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>

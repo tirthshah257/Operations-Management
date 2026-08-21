@@ -54,7 +54,7 @@ export default function Header({ onMobileToggle }) {
     switchActiveUser('USR-001');
     refreshAllState();
     setShowProfileMenu(false);
-    addToast('Switched session to Super Admin (System Administrator)', 'success');
+    addToast('Switched session to Meteoric 360', 'success');
   };
 
   return (
@@ -206,7 +206,7 @@ export default function Header({ onMobileToggle }) {
                 <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentUser?.name}</p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{currentUser?.email}</p>
                 <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold">
-                  Role: {activeRole}
+                  Role: {activeRole === 'Super Admin' ? 'Meteoric 360' : activeRole}
                 </span>
               </div>
 
@@ -232,7 +232,7 @@ export default function Header({ onMobileToggle }) {
                   className="w-full flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-bold text-xs transition-colors"
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Quick Switch to Super Admin
+                  Quick Switch to Meteoric 360
                 </button>
               )}
 

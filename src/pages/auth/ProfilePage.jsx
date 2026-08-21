@@ -55,7 +55,7 @@ export default function ProfilePage() {
     if (superAdmin) {
       switchActiveUser(superAdmin.id);
       refreshAllState();
-      addToast(`Switched session to Super Admin (${superAdmin.name})`, 'success');
+      addToast('Switched session to Meteoric 360', 'success');
     }
   };
 
@@ -73,7 +73,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2">
               <h1 className="text-lg sm:text-2xl font-black">{currentUser?.name}</h1>
               <span className="px-2.5 py-0.5 rounded-full bg-blue-500/30 border border-blue-400/40 text-blue-200 font-extrabold text-xs">
-                {activeRole}
+                {activeRole === 'Super Admin' ? 'Meteoric 360' : activeRole}
               </span>
             </div>
             <p className="text-xs text-slate-300 font-mono mt-1 flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function ProfilePage() {
           className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 shrink-0 transition-all"
         >
           <ShieldCheck className="w-4 h-4 fill-slate-950" />
-          Switch Session to Super Admin
+          Switch Session to Meteoric 360
         </button>
       </div>
 

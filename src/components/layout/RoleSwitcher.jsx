@@ -15,6 +15,7 @@ export default function RoleSwitcher() {
   const users = userService.getUsers();
 
   const demoSessions = [
+    { label: 'Meteoric 360 (Super Admin)', userId: 'USR-001', name: 'Meteoric 360', role: 'Super Admin', icon: '👑' },
     { label: 'User (Normal End User)', userId: 'USR-006', name: 'Neha Gupta', role: 'End User', icon: '👤' },
     { label: 'Mithun — IT', userId: 'USR-004', name: 'Mithun Parmar', role: 'IT Admin', icon: '💻' },
     { label: 'Rohan — IT', userId: 'USR-010', name: 'Rohan Shah', role: 'IT Admin', icon: '💻' },
@@ -172,7 +173,7 @@ export default function RoleSwitcher() {
                     : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <span>{r}</span>
+                <span>{r === 'Super Admin' ? 'Meteoric 360' : r}</span>
                 {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />}
               </button>
             );
