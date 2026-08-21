@@ -1,6 +1,6 @@
 export const DEFAULT_DEPARTMENTS = [
-  { id: 'DEPT-001', name: 'Information Technology', code: 'IT', head: 'Rahul Mehta', description: 'Core IT Infrastructure, Hardware, and Software Systems', status: 'Active' },
-  { id: 'DEPT-002', name: 'Administration', code: 'ADM', head: 'Priya Sharma', description: 'Facility, Housekeeping, Travel, and General Admin Operations', status: 'Active' },
+  { id: 'DEPT-001', name: 'Information Technology', code: 'IT', head: 'Mithun Parmar', description: 'Core IT Infrastructure, Hardware, and Software Systems', status: 'Active' },
+  { id: 'DEPT-002', name: 'Administration', code: 'ADM', head: 'Kiran Patel', description: 'Facility, Housekeeping, Travel, and General Admin Operations', status: 'Active' },
   { id: 'DEPT-003', name: 'Human Resources', code: 'HR', head: 'Anjali Verma', description: 'Talent Acquisition, Employee Relations, and Onboarding', status: 'Active' },
   { id: 'DEPT-004', name: 'Finance & Accounting', code: 'FIN', head: 'Vikram Joshi', description: 'Budgeting, Expenses, Payroll, and Audit Compliance', status: 'Active' },
   { id: 'DEPT-005', name: 'Operations', code: 'OPS', head: 'Suresh Kumar', description: 'Business Operations, Logistics, and Field Execution', status: 'Active' },
@@ -13,13 +13,15 @@ export const DEFAULT_LOCATIONS = [
   { id: 'LOC-002', name: 'Corporate Office (Mumbai)', code: 'BOM-CORP', address: 'Bandra Kurla Complex (BKC)', city: 'Mumbai', state: 'Maharashtra', pincode: '400051', contactPerson: 'Sneha Kulkarni', status: 'Active' },
   { id: 'LOC-003', name: 'Regional Office (Delhi NCR)', code: 'DEL-REG', address: 'Cyber City, Phase 2', city: 'Gurugram', state: 'Haryana', pincode: '122002', contactPerson: 'Amitabh Roy', status: 'Active' },
   { id: 'LOC-004', name: 'Operations Hub (Bengaluru)', code: 'BLR-OPS', address: 'Outer Ring Road, Marathahalli', city: 'Bengaluru', state: 'Karnataka', pincode: '560103', contactPerson: 'Deepak Nair', status: 'Active' },
+  { id: 'LOC-005', name: 'Aslali Factory', code: 'ASL-FAC', address: 'Plot 42, Aslali Industrial Estate', city: 'Ahmedabad', state: 'Gujarat', pincode: '382427', contactPerson: 'Mithun Parmar', status: 'Active' },
+  { id: 'LOC-006', name: 'Radhu Factory', code: 'RAD-FAC', address: 'Kheda Highway, Radhu GIDC', city: 'Kheda', state: 'Gujarat', pincode: '387560', contactPerson: 'Arvind Patel', status: 'Active' },
 ];
 
 export const DEFAULT_TEAMS = [
-  { id: 'TEAM-001', name: 'IT Support Team', departmentId: 'DEPT-001', teamLead: 'USR-004', members: ['USR-004', 'USR-005'], locationId: 'LOC-001', description: 'First line hardware, software & user support', status: 'Active' },
-  { id: 'TEAM-002', name: 'Infra & Network Team', departmentId: 'DEPT-001', teamLead: 'USR-004', members: ['USR-004'], locationId: 'LOC-001', description: 'Servers, Cloud, Switches, Firewalls & Wi-Fi', status: 'Active' },
+  { id: 'TEAM-001', name: 'IT Support Team', departmentId: 'DEPT-001', teamLead: 'USR-004', members: ['USR-004', 'USR-010', 'USR-011'], locationId: 'LOC-001', description: 'First line hardware, software & user support (Mithun, Rohan, Arvind)', status: 'Active' },
+  { id: 'TEAM-002', name: 'Infra & Network Team', departmentId: 'DEPT-001', teamLead: 'USR-004', members: ['USR-004', 'USR-010'], locationId: 'LOC-001', description: 'Servers, Cloud, Switches, Firewalls & Wi-Fi', status: 'Active' },
   { id: 'TEAM-003', name: 'Facility & HVAC Team', departmentId: 'DEPT-006', teamLead: 'USR-005', members: ['USR-005'], locationId: 'LOC-001', description: 'AC units, Plumbing, Lighting & Civil fixes', status: 'Active' },
-  { id: 'TEAM-004', name: 'Admin Operations Desk', departmentId: 'DEPT-002', teamLead: 'USR-003', members: ['USR-003'], locationId: 'LOC-002', description: 'Stationery, Couriers, Inward/Outward & Pantry', status: 'Active' },
+  { id: 'TEAM-004', name: 'Admin Operations Desk', departmentId: 'DEPT-002', teamLead: 'USR-002', members: ['USR-002'], locationId: 'LOC-002', description: 'Stationery, Couriers, Inward/Outward & Pantry (Kiran Patel)', status: 'Active' },
   { id: 'TEAM-005', name: 'Finance Audit Desk', departmentId: 'DEPT-004', teamLead: 'USR-007', members: ['USR-007'], locationId: 'LOC-002', description: 'Expense approvals, vendor payments & contract verification', status: 'Active' },
 ];
 
@@ -35,14 +37,16 @@ export const DEFAULT_VENDORS = [
 
 export const DEFAULT_USERS = [
   { id: 'USR-001', name: 'System Administrator', email: 'admin@enterprise.com', role: 'Super Admin', roleId: 'ROLE-001', departmentId: 'DEPT-001', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
-  { id: 'USR-002', name: 'Krunal Patel', email: 'krunal.patel@enterprise.com', role: 'Admin', roleId: 'ROLE-002', departmentId: 'DEPT-001', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-002', name: 'Kiran Patel', email: 'kiran.patel@enterprise.com', role: 'Admin', roleId: 'ROLE-002', departmentId: 'DEPT-002', locationId: 'LOC-005', status: 'Active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-003', name: 'Priya Sharma', email: 'priya.sharma@enterprise.com', role: 'Manager', roleId: 'ROLE-003', departmentId: 'DEPT-002', locationId: 'LOC-002', status: 'Active', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150' },
-  { id: 'USR-004', name: 'Rahul Mehta', email: 'rahul.mehta@enterprise.com', role: 'IT Admin', roleId: 'ROLE-004', departmentId: 'DEPT-001', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-004', name: 'Mithun Parmar', email: 'mithun@enterprise.com', role: 'IT Admin', roleId: 'ROLE-004', departmentId: 'DEPT-001', locationId: 'LOC-005', status: 'Active', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-005', name: 'Amit Joshi', email: 'amit.joshi@enterprise.com', role: 'Technician', roleId: 'ROLE-005', departmentId: 'DEPT-006', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150' },
-  { id: 'USR-006', name: 'Neha Gupta', email: 'neha.gupta@enterprise.com', role: 'End User', roleId: 'ROLE-006', departmentId: 'DEPT-003', locationId: 'LOC-003', status: 'Active', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-006', name: 'Neha Gupta', email: 'neha.gupta@enterprise.com', role: 'End User', roleId: 'ROLE-006', departmentId: 'DEPT-003', locationId: 'LOC-005', status: 'Active', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-007', name: 'Vikram Joshi', email: 'vikram.joshi@enterprise.com', role: 'Finance', roleId: 'ROLE-009', departmentId: 'DEPT-004', locationId: 'LOC-002', status: 'Active', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-008', name: 'Suresh Kumar', email: 'suresh.kumar@enterprise.com', role: 'Project Manager', roleId: 'ROLE-007', departmentId: 'DEPT-005', locationId: 'LOC-004', status: 'Active', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150' },
   { id: 'USR-009', name: 'Ramesh Patel', email: 'ramesh.patel@enterprise.com', role: 'Inventory Manager', roleId: 'ROLE-008', departmentId: 'DEPT-002', locationId: 'LOC-001', status: 'Active', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-010', name: 'Rohan Shah', email: 'rohan@enterprise.com', role: 'IT Admin', roleId: 'ROLE-004', departmentId: 'DEPT-001', locationId: 'LOC-006', status: 'Active', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150' },
+  { id: 'USR-011', name: 'Arvind Patel', email: 'arvind@enterprise.com', role: 'IT Admin', roleId: 'ROLE-004', departmentId: 'DEPT-001', locationId: 'LOC-006', status: 'Active', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=150' },
 ];
 
 export const DEFAULT_ROLES = [
@@ -58,14 +62,14 @@ export const DEFAULT_ROLES = [
 ];
 
 export const DEFAULT_COMPLAINT_MATRIX = [
-  { id: 'CM-001', category: 'Facility / HVAC', subcategory: 'AC Unit', ticketType: 'Maintenance', example: 'AC not cooling, water leakage from split AC', priority: 'High', slaHours: 4, teamId: 'TEAM-003', departmentId: 'DEPT-006', status: 'Active' },
-  { id: 'CM-002', category: 'Power / Electrical', subcategory: 'UPS & Generator', ticketType: 'Maintenance', example: 'UPS beep alarm, battery backup failing during outage', priority: 'High', slaHours: 2, teamId: 'TEAM-003', departmentId: 'DEPT-006', status: 'Active' },
+  { id: 'CM-001', category: 'Facility / HVAC', subcategory: 'AC Unit', ticketType: 'Admin', example: 'AC not cooling in production floor, water leakage', priority: 'High', slaHours: 4, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
+  { id: 'CM-002', category: 'Power / Electrical', subcategory: 'UPS & Generator', ticketType: 'Admin', example: 'Factory UPS beep alarm, generator switch failure', priority: 'High', slaHours: 2, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
   { id: 'CM-003', category: 'IT & Hardware', subcategory: 'Laptop / Desktop', ticketType: 'IT', example: 'Laptop display blue screen, RAM upgrade request, battery issue', priority: 'Medium', slaHours: 8, teamId: 'TEAM-001', departmentId: 'DEPT-001', status: 'Active' },
-  { id: 'CM-004', category: 'Network / Internet', subcategory: 'Wi-Fi & LAN', ticketType: 'IT', example: 'Wi-Fi disconnects frequently, LAN cable damaged', priority: 'High', slaHours: 4, teamId: 'TEAM-002', departmentId: 'DEPT-001', status: 'Active' },
+  { id: 'CM-004', category: 'Network / Internet', subcategory: 'Wi-Fi & LAN', ticketType: 'IT', example: 'Aslali Factory Wi-Fi disconnects frequently, LAN port broken', priority: 'High', slaHours: 4, teamId: 'TEAM-001', departmentId: 'DEPT-001', status: 'Active' },
   { id: 'CM-005', category: 'Furniture', subcategory: 'Chair & Desk', ticketType: 'Admin', example: 'Ergonomic chair wheel broken, desk lock stuck', priority: 'Medium', slaHours: 12, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
-  { id: 'CM-006', category: 'General Admin', subcategory: 'Housekeeping & Pantry', ticketType: 'Admin', example: 'Drinking water cooler refill required, floor cleaning request', priority: 'Low', slaHours: 24, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
-  { id: 'CM-007', category: 'Courier & Logistics', subcategory: 'Inward / Outward', ticketType: 'Admin', example: 'Urgent document dispatch required, incoming parcel trace', priority: 'Medium', slaHours: 6, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
-  { id: 'CM-008', category: 'Stationery', subcategory: 'Office Supplies', ticketType: 'Admin', example: 'A4 paper bundle request, printer toner cartridge replacement', priority: 'Low', slaHours: 12, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
+  { id: 'CM-006', category: 'General Admin', subcategory: 'Housekeeping & Pantry', ticketType: 'Admin', example: 'Water cooler refill at Radhu Factory, canteen hygiene check', priority: 'Low', slaHours: 24, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
+  { id: 'CM-007', category: 'Courier & Logistics', subcategory: 'Inward / Outward', ticketType: 'Admin', example: 'Urgent factory raw material dispatch parcel trace', priority: 'Medium', slaHours: 6, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
+  { id: 'CM-008', category: 'Stationery', subcategory: 'Office Supplies', ticketType: 'Admin', example: 'A4 paper bundle request, barcode toner cartridge replacement', priority: 'Low', slaHours: 12, teamId: 'TEAM-004', departmentId: 'DEPT-002', status: 'Active' },
 ];
 
 export const DEFAULT_ESCALATION_MATRIX = [

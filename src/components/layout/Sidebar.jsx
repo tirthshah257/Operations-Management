@@ -101,9 +101,9 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, onMobileC
       if (item.name === 'My Profile & Account') return true;
 
       if (activeRole === 'End User') {
-        return ['Dashboard', 'Tickets', 'IT Assets', 'Knowledge Base'].includes(item.name);
+        return ['Dashboard', 'Tickets', 'My Tickets', 'Knowledge Base'].includes(item.name);
       }
-      if (activeRole === 'Technician') {
+      if (activeRole === 'IT Admin' || activeRole === 'Technician') {
         return ['Dashboard', 'Tickets', 'IT Assets', 'Maintenance', 'Knowledge Base'].includes(item.name);
       }
       if (activeRole === 'Manager') {

@@ -19,11 +19,13 @@ export const assetService = {
       ...assetData,
       id: assetId,
       assetId,
+      assetName: assetData.assetName || `${assetData.make || 'IT'} ${assetData.model || 'Asset'}`,
       qrCode: `${assetId}-QR`,
       barcode: assetData.barcode || `89012345${Math.floor(10000 + Math.random() * 90000)}`,
-      status: assetData.status || 'In Stock',
-      verificationStatus: 'Pending Verification',
-      lastVerifiedDate: new Date().toISOString().split('T')[0]
+      status: assetData.status || 'Available',
+      verificationStatus: 'Verified',
+      lastVerifiedDate: new Date().toISOString().split('T')[0],
+      allocationHistory: assetData.allocationHistory || []
     };
 
     assets.unshift(newAsset);
@@ -33,40 +35,120 @@ export const assetService = {
       module: 'Asset Management',
       action: 'CREATE',
       recordId: assetId,
-      description: `Registered asset ${assetId} (${newAsset.make} ${newAsset.model})`
+      description: `Registered asset ${assetId} (${newAsset.assetName})`
     });
 
     return newAsset;
   },
 
-  transferAsset(id, { currentUserId, departmentId, locationId, reason, notes, user = 'Admin' }) {
+  allocateAsset(id, { userId, userName, locationId, locationName, allocationDate, notes = '' }) {
     const assets = storageService.getItem(storageService.KEYS.ASSETS, []);
     const index = assets.findIndex(a => a.id === id);
     if (index !== -1) {
-      const prevUser = assets[index].currentUserId;
-      const prevDept = assets[index].departmentId;
-      const prevLoc = assets[index].locationId;
+      const asset = assets[index];
+      const allocDate = allocationDate || new Date().toISOString().split('T')[0];
 
-      if (currentUserId !== undefined) assets[index].currentUserId = currentUserId;
-      if (departmentId !== undefined) assets[index].departmentId = departmentId;
-      if (locationId !== undefined) assets[index].locationId = locationId;
+      asset.status = 'Allocated';
+      asset.currentUserId = userId;
+      asset.currentUserName = userName;
+      asset.locationId = locationId;
+      asset.locationName = locationName;
+      asset.allocationDate = allocDate;
 
-      assets[index].status = currentUserId ? 'In Use' : 'In Stock';
+      if (!asset.allocationHistory) asset.allocationHistory = [];
+
+      asset.allocationHistory.unshift({
+        id: `ALH-${Date.now()}`,
+        type: 'Allocation',
+        fromUserId: null,
+        fromUserName: null,
+        toUserId: userId,
+        toUserName: userName,
+        fromLocationId: null,
+        fromLocationName: null,
+        toLocationId: locationId,
+        toLocationName: locationName,
+        date: allocDate,
+        notes: notes || `Allocated asset to ${userName} at ${locationName}`
+      });
 
       storageService.setItem(storageService.KEYS.ASSETS, assets);
 
       auditService.logAction({
         module: 'Asset Management',
-        action: 'TRANSFER',
+        action: 'ALLOCATE',
         recordId: id,
-        description: `Transferred asset ${id} to User: ${currentUserId || 'None'}, Dept: ${departmentId}, Location: ${locationId}. Reason: ${reason || notes}`,
-        previousValue: `User: ${prevUser}, Dept: ${prevDept}, Loc: ${prevLoc}`,
-        newValue: `User: ${currentUserId}, Dept: ${departmentId}, Loc: ${locationId}`
+        description: `Allocated asset ${id} to ${userName} at ${locationName}`
       });
 
-      return assets[index];
+      return asset;
     }
     return null;
+  },
+
+  reallocateAsset(id, { newUserId, newUserName, newLocationId, newLocationName, reallocationDate, reason = '' }) {
+    const assets = storageService.getItem(storageService.KEYS.ASSETS, []);
+    const index = assets.findIndex(a => a.id === id);
+    if (index !== -1) {
+      const asset = assets[index];
+      const prevUserId = asset.currentUserId;
+      const prevUserName = asset.currentUserName;
+      const prevLocId = asset.locationId;
+      const prevLocName = asset.locationName;
+      const reallocDate = reallocationDate || new Date().toISOString().split('T')[0];
+
+      asset.status = 'Allocated';
+      asset.currentUserId = newUserId;
+      asset.currentUserName = newUserName;
+      asset.locationId = newLocationId;
+      asset.locationName = newLocationName;
+      asset.allocationDate = reallocDate;
+
+      if (!asset.allocationHistory) asset.allocationHistory = [];
+
+      asset.allocationHistory.unshift({
+        id: `ALH-${Date.now()}`,
+        type: 'Reallocation',
+        fromUserId: prevUserId,
+        fromUserName: prevUserName,
+        toUserId: newUserId,
+        toUserName: newUserName,
+        fromLocationId: prevLocId,
+        fromLocationName: prevLocName,
+        toLocationId: newLocationId,
+        toLocationName: newLocationName,
+        date: reallocDate,
+        notes: reason || `Reallocated from ${prevUserName || 'Previous User'} to ${newUserName}`
+      });
+
+      storageService.setItem(storageService.KEYS.ASSETS, assets);
+
+      auditService.logAction({
+        module: 'Asset Management',
+        action: 'REALLOCATE',
+        recordId: id,
+        description: `Reallocated asset ${id} from ${prevUserName} to ${newUserName}. Reason: ${reason}`
+      });
+
+      return asset;
+    }
+    return null;
+  },
+
+  getAllocationHistory(id) {
+    const asset = this.getAssetById(id);
+    return asset ? (asset.allocationHistory || []) : [];
+  },
+
+  transferAsset(id, { currentUserId, departmentId, locationId, reason, notes }) {
+    return this.reallocateAsset(id, {
+      newUserId: currentUserId,
+      newUserName: currentUserId,
+      newLocationId: locationId,
+      newLocationName: locationId,
+      reallocationDate: new Date().toISOString().split('T')[0],
+      reason: reason || notes
+    });
   },
 
   updateVerification(id, { status = 'Verified', notes = '' }) {

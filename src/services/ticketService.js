@@ -6,13 +6,12 @@ import { slaService } from './slaService';
 export const ticketService = {
   getTickets() {
     const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
-    // Re-evaluate SLA status dynamically
     return tickets.map(t => {
       const slaEval = slaService.evaluateTicketSla(t);
       return {
         ...t,
         slaEvaluation: slaEval,
-        computedStatus: t.status === 'Resolved' || t.status === 'Closed' ? t.status : (slaEval.isOverdue ? 'Breached' : t.status)
+        computedStatus: t.status === 'Solved' || t.status === 'Closed' ? t.status : (slaEval.isOverdue ? 'Breached' : t.status)
       };
     });
   },
@@ -21,12 +20,28 @@ export const ticketService = {
     return this.getTickets().find(t => t.id === id) || null;
   },
 
+  getItTickets() {
+    return this.getTickets().filter(t => t.ticketType === 'IT');
+  },
+
+  getAdminTickets() {
+    return this.getTickets().filter(t => t.ticketType === 'Admin');
+  },
+
+  // Check active ticket limit for demo user (max 1 IT, max 1 Admin)
+  getActiveTicketCount(userId, ticketType) {
+    const tickets = this.getTickets();
+    const activeStatuses = ['Open', 'Assigned', 'In Progress', 'Solved'];
+    return tickets.filter(
+      t => (t.requesterId === userId || !userId) && t.ticketType === ticketType && activeStatuses.includes(t.status)
+    ).length;
+  },
+
   createTicket(ticketData) {
     const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
     const count = tickets.length + 1001;
     const ticketId = `TKT-${count}`;
 
-    // Matrix lookup if categoryId provided
     const rule = ticketData.categoryId ? complaintMatrixService.getRuleById(ticketData.categoryId) : null;
     const priority = ticketData.priority || (rule ? rule.priority : 'Medium');
     const slaHours = ticketData.slaHours || (rule ? rule.slaHours : 8);
@@ -44,12 +59,13 @@ export const ticketService = {
       subcategory: ticketData.subcategory || (rule ? rule.subcategory : 'General'),
       subject: ticketData.subject,
       description: ticketData.description,
-      requesterId: ticketData.requesterId || 'USR-002',
+      requesterId: ticketData.requesterId || 'USR-006',
       departmentId: ticketData.departmentId || 'DEPT-001',
-      locationId: ticketData.locationId || 'LOC-001',
+      locationId: ticketData.locationId || 'LOC-005', // Default Aslali Factory
       priority,
       assignedTeamId,
       assignedUserId: ticketData.assignedUserId || null,
+      assignedToName: ticketData.assignedToName || 'Unassigned',
       assetId: ticketData.assetId || null,
       slaHours,
       status: 'Open',
@@ -65,9 +81,9 @@ export const ticketService = {
       timeline: [
         {
           action: 'Ticket Created',
-          user: ticketData.requesterName || 'Employee',
+          user: ticketData.requesterName || 'User',
           timestamp: createdDate,
-          notes: ticketData.createdChannel === 'Email' ? 'Created via Email Ticket Simulator' : 'Created via Portal'
+          notes: `Created ticket (${ticketData.ticketType || 'IT'} Ticket)`
         }
       ]
     };
@@ -85,46 +101,18 @@ export const ticketService = {
     return newTicket;
   },
 
-  updateTicketStatus(id, newStatus, user = 'Admin', notes = '') {
+  assignTicket(id, { userId, assignedToName, assignedBy = 'System' }) {
     const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
     const index = tickets.findIndex(t => t.id === id);
     if (index !== -1) {
-      const prevStatus = tickets[index].status;
-      tickets[index].status = newStatus;
+      tickets[index].assignedUserId = userId;
+      tickets[index].assignedToName = assignedToName || 'Assigned';
+      tickets[index].status = 'Assigned';
       tickets[index].timeline.push({
-        action: 'Status Changed',
-        user,
-        timestamp: new Date().toISOString(),
-        notes: `Status changed from ${prevStatus} to ${newStatus}. ${notes}`
-      });
-
-      storageService.setItem(storageService.KEYS.TICKETS, tickets);
-
-      auditService.logAction({
-        module: 'Ticketing',
-        action: 'STATUS_CHANGE',
-        recordId: id,
-        description: `Ticket ${id} status updated from ${prevStatus} to ${newStatus}`,
-        previousValue: prevStatus,
-        newValue: newStatus
-      });
-      return tickets[index];
-    }
-    return null;
-  },
-
-  assignTicket(id, { teamId, userId, assignedBy = 'Admin' }) {
-    const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
-    const index = tickets.findIndex(t => t.id === id);
-    if (index !== -1) {
-      if (teamId) tickets[index].assignedTeamId = teamId;
-      if (userId !== undefined) tickets[index].assignedUserId = userId;
-
-      tickets[index].timeline.push({
-        action: 'Assignment Updated',
+        action: 'Ticket Assigned',
         user: assignedBy,
         timestamp: new Date().toISOString(),
-        notes: `Assigned team set to ${teamId || 'Unchanged'}, technician set to ${userId || 'Unassigned'}`
+        notes: `Assigned to ${assignedToName}`
       });
 
       storageService.setItem(storageService.KEYS.TICKETS, tickets);
@@ -133,7 +121,86 @@ export const ticketService = {
         module: 'Ticketing',
         action: 'ASSIGN',
         recordId: id,
-        description: `Reassigned ticket ${id} to team ${teamId} / technician ${userId}`
+        description: `Assigned ticket ${id} to ${assignedToName}`
+      });
+      return tickets[index];
+    }
+    return null;
+  },
+
+  startProgress(id, { user = 'Technician' } = {}) {
+    const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
+    const index = tickets.findIndex(t => t.id === id);
+    if (index !== -1) {
+      tickets[index].status = 'In Progress';
+      tickets[index].timeline.push({
+        action: 'Started In Progress',
+        user,
+        timestamp: new Date().toISOString(),
+        notes: 'Work started on ticket'
+      });
+
+      storageService.setItem(storageService.KEYS.TICKETS, tickets);
+
+      auditService.logAction({
+        module: 'Ticketing',
+        action: 'STATUS_CHANGE',
+        recordId: id,
+        description: `Ticket ${id} moved to In Progress`
+      });
+      return tickets[index];
+    }
+    return null;
+  },
+
+  solveTicket(id, { resolutionRemarks, solvedBy = 'Technician' }) {
+    const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
+    const index = tickets.findIndex(t => t.id === id);
+    if (index !== -1) {
+      const now = new Date().toISOString();
+      tickets[index].status = 'Solved';
+      tickets[index].resolution = resolutionRemarks;
+      tickets[index].resolvedBy = solvedBy;
+      tickets[index].resolvedDate = now;
+      tickets[index].timeline.push({
+        action: 'Ticket Solved',
+        user: solvedBy,
+        timestamp: now,
+        notes: `Resolution Remarks: ${resolutionRemarks}`
+      });
+
+      storageService.setItem(storageService.KEYS.TICKETS, tickets);
+
+      auditService.logAction({
+        module: 'Ticketing',
+        action: 'SOLVE',
+        recordId: id,
+        description: `Solved ticket ${id}`
+      });
+      return tickets[index];
+    }
+    return null;
+  },
+
+  closeTicket(id, { closedBy = 'User' } = {}) {
+    const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
+    const index = tickets.findIndex(t => t.id === id);
+    if (index !== -1) {
+      tickets[index].status = 'Closed';
+      tickets[index].timeline.push({
+        action: 'Ticket Closed',
+        user: closedBy,
+        timestamp: new Date().toISOString(),
+        notes: 'Ticket confirmed solved and closed'
+      });
+
+      storageService.setItem(storageService.KEYS.TICKETS, tickets);
+
+      auditService.logAction({
+        module: 'Ticketing',
+        action: 'CLOSE',
+        recordId: id,
+        description: `Closed ticket ${id}`
       });
       return tickets[index];
     }
@@ -156,81 +223,22 @@ export const ticketService = {
     return null;
   },
 
-  resolveTicket(id, { resolvedBy, resolutionText }) {
+  updateTicketStatus(id, newStatus, user = 'Admin', notes = '') {
     const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
     const index = tickets.findIndex(t => t.id === id);
     if (index !== -1) {
-      const now = new Date().toISOString();
-      tickets[index].status = 'Resolved';
-      tickets[index].resolution = resolutionText;
-      tickets[index].resolvedBy = resolvedBy;
-      tickets[index].resolvedDate = now;
+      const prevStatus = tickets[index].status;
+      tickets[index].status = newStatus;
       tickets[index].timeline.push({
-        action: 'Resolution Provided',
-        user: resolvedBy,
-        timestamp: now,
-        notes: `Resolved: ${resolutionText}`
+        action: 'Status Changed',
+        user,
+        timestamp: new Date().toISOString(),
+        notes: `Status changed from ${prevStatus} to ${newStatus}. ${notes}`
       });
-      storageService.setItem(storageService.KEYS.TICKETS, tickets);
 
-      auditService.logAction({
-        module: 'Ticketing',
-        action: 'RESOLVE',
-        recordId: id,
-        description: `Resolved ticket ${id}`
-      });
-      return tickets[index];
-    }
-    return null;
-  },
-
-  submitFeedback(id, { rating, comment, action = 'accept' }) {
-    const tickets = storageService.getItem(storageService.KEYS.TICKETS, []);
-    const index = tickets.findIndex(t => t.id === id);
-    if (index !== -1) {
-      tickets[index].feedbackRating = rating;
-      tickets[index].feedbackComment = comment;
-
-      if (action === 'reopen') {
-        tickets[index].status = 'Reopened';
-        tickets[index].timeline.push({
-          action: 'Ticket Reopened',
-          user: 'Requester',
-          timestamp: new Date().toISOString(),
-          notes: `Reopened ticket. Reason: ${comment}`
-        });
-      } else {
-        tickets[index].status = 'Closed';
-        tickets[index].timeline.push({
-          action: 'Ticket Closed',
-          user: 'Requester',
-          timestamp: new Date().toISOString(),
-          notes: `Resolution accepted with ${rating} Star Rating`
-        });
-      }
       storageService.setItem(storageService.KEYS.TICKETS, tickets);
       return tickets[index];
     }
     return null;
-  },
-
-  simulateEmailTicket(emailData) {
-    const suggestedRule = complaintMatrixService.matchKeywordSuggestion(emailData.subject + ' ' + emailData.body);
-
-    return this.createTicket({
-      ticketType: suggestedRule ? suggestedRule.ticketType : 'IT',
-      categoryId: suggestedRule ? suggestedRule.id : null,
-      category: suggestedRule ? suggestedRule.category : 'Email Request',
-      subcategory: suggestedRule ? suggestedRule.subcategory : 'General',
-      subject: emailData.subject,
-      description: `[Email Sender: ${emailData.senderEmail}]\n\n${emailData.body}`,
-      requesterId: 'USR-006',
-      departmentId: 'DEPT-003',
-      locationId: 'LOC-003',
-      priority: suggestedRule ? suggestedRule.priority : 'Medium',
-      slaHours: suggestedRule ? suggestedRule.slaHours : 8,
-      assignedTeamId: suggestedRule ? suggestedRule.teamId : 'TEAM-001',
-      createdChannel: 'Email'
-    });
   }
 };

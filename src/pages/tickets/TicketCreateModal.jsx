@@ -4,11 +4,13 @@ import FileUpload from '../../components/common/FileUpload';
 import { ticketService } from '../../services/ticketService';
 import { complaintMatrixService } from '../../services/complaintMatrixService';
 import { useAppData } from '../../context/AppDataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { Sparkles, AlertCircle, Laptop, Shield } from 'lucide-react';
 
 export default function TicketCreateModal({ isOpen, onClose }) {
   const { refreshAllState, departments, locations, assets } = useAppData();
+  const { currentUser } = useAuth();
   const { addToast } = useToast();
 
   const [subject, setSubject] = useState('');
@@ -17,10 +19,26 @@ export default function TicketCreateModal({ isOpen, onClose }) {
   const [categoryId, setCategoryId] = useState('');
   const [priority, setPriority] = useState('Medium');
   const [departmentId, setDepartmentId] = useState('DEPT-001');
-  const [locationId, setLocationId] = useState('LOC-001');
+  const [locationId, setLocationId] = useState('LOC-005'); // Default Aslali Factory
   const [assetId, setAssetId] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [suggestedRule, setSuggestedRule] = useState(null);
+
+  // Calculate user active ticket limits (Max 1 IT, Max 1 Admin)
+  const activeItCount = ticketService.getActiveTicketCount(currentUser?.id, 'IT');
+  const activeAdminCount = ticketService.getActiveTicketCount(currentUser?.id, 'Admin');
+
+  const isItDisabled = activeItCount >= 1;
+  const isAdminDisabled = activeAdminCount >= 1;
+
+  // Auto set available ticket type if current selection is disabled
+  useEffect(() => {
+    if (ticketType === 'IT' && isItDisabled && !isAdminDisabled) {
+      setTicketType('Admin');
+    } else if (ticketType === 'Admin' && isAdminDisabled && !isItDisabled) {
+      setTicketType('IT');
+    }
+  }, [isItDisabled, isAdminDisabled, ticketType]);
 
   // Auto Categorization Rule Engine
   useEffect(() => {
@@ -30,35 +48,49 @@ export default function TicketCreateModal({ isOpen, onClose }) {
         setSuggestedRule(match);
         setCategoryId(match.id);
         setPriority(match.priority);
-        setTicketType(match.ticketType || 'IT');
+        if (match.ticketType === 'Admin' && !isAdminDisabled) {
+          setTicketType('Admin');
+        } else if (match.ticketType === 'IT' && !isItDisabled) {
+          setTicketType('IT');
+        }
       }
     } else {
       setSuggestedRule(null);
     }
-  }, [subject, description]);
+  }, [subject, description, isItDisabled, isAdminDisabled]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!subject.trim()) return;
+
+    if (ticketType === 'IT' && isItDisabled) {
+      addToast('You already have an active IT ticket.', 'error');
+      return;
+    }
+
+    if (ticketType === 'Admin' && isAdminDisabled) {
+      addToast('You already have an active Admin ticket.', 'error');
+      return;
+    }
 
     ticketService.createTicket({
       subject,
       description,
       ticketType,
       categoryId,
-      category: suggestedRule ? suggestedRule.category : 'General',
+      category: suggestedRule ? suggestedRule.category : (ticketType === 'IT' ? 'IT Support' : 'General Admin'),
       subcategory: suggestedRule ? suggestedRule.subcategory : 'General',
       priority,
       departmentId,
       locationId,
       assetId: assetId || null,
       attachments,
-      requesterId: 'USR-002',
+      requesterId: currentUser?.id || 'USR-006',
       createdChannel: 'Portal'
     });
 
     refreshAllState();
-    addToast('Ticket raised successfully!', 'success');
+    addToast(`${ticketType} Ticket raised successfully!`, 'success');
     onClose();
 
     // Reset Form
@@ -71,15 +103,83 @@ export default function TicketCreateModal({ isOpen, onClose }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Raise New Support Complaint / Ticket" maxWidth="max-w-2xl">
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        {/* Ticket Type Selection Radio Group */}
+        <div className="space-y-1">
+          <label className="block font-semibold text-slate-700 dark:text-slate-300">
+            Select Ticket Type <span className="text-rose-500">*</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label
+              className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
+                ticketType === 'IT'
+                  ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 text-blue-950 dark:text-blue-200 font-bold shadow-xs'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
+              } ${isItDisabled ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50' : ''}`}
+            >
+              <input
+                type="radio"
+                name="ticketType"
+                value="IT"
+                disabled={isItDisabled}
+                checked={ticketType === 'IT'}
+                onChange={() => setTicketType('IT')}
+                className="mt-0.5"
+              />
+              <div className="space-y-0.5 min-w-0">
+                <span className="font-bold flex items-center gap-1.5 text-xs">
+                  <Laptop className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  IT Ticket
+                </span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Hardware, Wi-Fi, Software & IT access issues</p>
+                {isItDisabled && (
+                  <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 pt-1">
+                    <AlertCircle className="w-3 h-3" /> You already have an active IT ticket.
+                  </p>
+                )}
+              </div>
+            </label>
+
+            <label
+              className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
+                ticketType === 'Admin'
+                  ? 'border-purple-500 bg-purple-50/70 dark:bg-purple-950/40 text-purple-950 dark:text-purple-200 font-bold shadow-xs'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
+              } ${isAdminDisabled ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50' : ''}`}
+            >
+              <input
+                type="radio"
+                name="ticketType"
+                value="Admin"
+                disabled={isAdminDisabled}
+                checked={ticketType === 'Admin'}
+                onChange={() => setTicketType('Admin')}
+                className="mt-0.5"
+              />
+              <div className="space-y-0.5 min-w-0">
+                <span className="font-bold flex items-center gap-1.5 text-xs">
+                  <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  Admin Ticket
+                </span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Facility, AC, Housekeeping & Admin services</p>
+                {isAdminDisabled && (
+                  <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 pt-1">
+                    <AlertCircle className="w-3 h-3" /> You already have an active Admin ticket.
+                  </p>
+                )}
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div>
           <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Complaint Subject / Title</label>
           <input
             type="text"
             required
-            placeholder="e.g. AC in server room not cooling / Wi-Fi disconnected"
+            placeholder="e.g., Aslali Factory packing Wi-Fi disconnected / AC water leakage"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+            className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
           />
         </div>
 
@@ -104,7 +204,7 @@ export default function TicketCreateModal({ isOpen, onClose }) {
           <textarea
             rows={3}
             required
-            placeholder="Provide exact error code, physical location, or steps to reproduce..."
+            placeholder="Provide exact error code, physical factory bay, or steps to reproduce..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
@@ -113,25 +213,26 @@ export default function TicketCreateModal({ isOpen, onClose }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block font-semibold text-slate-500 mb-1">Ticket Type</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Factory / Location</label>
             <select
-              value={ticketType}
-              onChange={(e) => setTicketType(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
             >
-              <option value="IT">IT Ticket</option>
-              <option value="Admin">Admin Ticket</option>
-              <option value="Maintenance">Maintenance Ticket</option>
-              <option value="Others">Others</option>
+              {locations.map(l => (
+                <option key={l.id} value={l.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                  {l.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-500 mb-1">Priority Level</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Priority Level</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
             >
               <option value="Low">Low (24h SLA)</option>
               <option value="Medium">Medium (8h SLA)</option>
@@ -141,43 +242,15 @@ export default function TicketCreateModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-500 mb-1">Related Asset (Optional)</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Related Asset (Optional)</label>
             <select
               value={assetId}
               onChange={(e) => setAssetId(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
             >
-              <option value="">None / Facility Issue</option>
+              <option value="">None / General Issue</option>
               {assets.map(a => (
-                <option key={a.id} value={a.id}>{a.assetId} — {a.make} {a.model}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block font-semibold text-slate-500 mb-1">Department</label>
-            <select
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-            >
-              {departments.map(d => (
-                <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-slate-500 mb-1">Office Location</label>
-            <select
-              value={locationId}
-              onChange={(e) => setLocationId(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-            >
-              {locations.map(l => (
-                <option key={l.id} value={l.id}>{l.name}</option>
+                <option key={a.id} value={a.id}>{a.assetId} — {a.assetName || `${a.make} ${a.model}`}</option>
               ))}
             </select>
           </div>
@@ -198,9 +271,10 @@ export default function TicketCreateModal({ isOpen, onClose }) {
           </button>
           <button
             type="submit"
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm"
+            disabled={(ticketType === 'IT' && isItDisabled) || (ticketType === 'Admin' && isAdminDisabled)}
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-lg shadow-sm transition-all"
           >
-            Submit Complaint Ticket
+            Submit {ticketType} Ticket
           </button>
         </div>
       </form>

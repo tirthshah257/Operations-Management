@@ -86,8 +86,26 @@ export const storageService = {
 
   initializeSeedData(force = false) {
     Object.entries(SEED_DEFAULTS).forEach(([key, defaultValue]) => {
-      if (force || !localStorage.getItem(key)) {
+      const existing = localStorage.getItem(key);
+      if (force || !existing) {
         localStorage.setItem(key, JSON.stringify(defaultValue));
+      } else {
+        if (key === STORAGE_KEYS.LOCATIONS) {
+          try {
+            const parsed = JSON.parse(existing);
+            if (!parsed.some(l => l.name.includes('Aslali'))) {
+              localStorage.setItem(key, JSON.stringify(defaultValue));
+            }
+          } catch (e) {}
+        }
+        if (key === STORAGE_KEYS.USERS) {
+          try {
+            const parsed = JSON.parse(existing);
+            if (!parsed.some(u => u.name.includes('Mithun'))) {
+              localStorage.setItem(key, JSON.stringify(defaultValue));
+            }
+          } catch (e) {}
+        }
       }
     });
   },
@@ -96,7 +114,6 @@ export const storageService = {
     try {
       const data = localStorage.getItem(key);
       if (data) return JSON.parse(data);
-      // If missing, initialize from seed defaults if available
       if (SEED_DEFAULTS[key]) {
         localStorage.setItem(key, JSON.stringify(SEED_DEFAULTS[key]));
         return SEED_DEFAULTS[key];
